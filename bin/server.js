@@ -5,6 +5,7 @@ import * as env from 'lib0/environment'
 import * as yredis from '@y/redis'
 
 const port = number.parseInt(env.getConf('port') || '3002')
+console.log('port', port)
 const redisPrefix = env.getConf('redis-prefix') || 'y'
 const postgresUrl = env.getConf('postgres')
 const s3Endpoint = env.getConf('s3-endpoint')
@@ -14,8 +15,10 @@ let store
 if (s3Endpoint) {
   console.log('using s3 store')
   const { createS3Storage } = await import('../src/storage/s3.js')
-  const bucketName = 'ydocs'
+  console.log('finished importing s3')
+  const bucketName = 'web-deckbuilding-storage'
   store = createS3Storage(bucketName)
+  console.log('created s3 store')
   try {
     // make sure the bucket exists
     await store.client.makeBucket(bucketName)

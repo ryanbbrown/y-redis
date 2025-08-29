@@ -22,12 +22,14 @@ export const createS3Storage = (bucketName) => {
   const useSSL = !['false', '0'].includes(env.getConf('s3-ssl') || 'false')
   const accessKey = env.ensureConf('s3-access-key')
   const secretKey = env.ensureConf('s3-secret-key')
+  const region = env.getConf('s3-region') || 'us-east-1'
   return new S3Storage(bucketName, {
     endPoint,
     port,
     useSSL,
     accessKey,
-    secretKey
+    secretKey,
+    region
   })
 }
 
@@ -55,6 +57,7 @@ export const decodeS3ObjectName = objectName => {
  * @property {boolean} S3StorageConf.useSSL
  * @property {string} S3StorageConf.accessKey
  * @property {string} S3StorageConf.secretKey
+ * @property {string} S3StorageConf.region
  */
 
 /**
@@ -79,14 +82,15 @@ export class S3Storage {
    * @param {string} bucketName
    * @param {S3StorageConf} conf
    */
-  constructor (bucketName, { endPoint, port, useSSL, accessKey, secretKey }) {
+  constructor (bucketName, { endPoint, port, useSSL, accessKey, secretKey, region }) {
     this.bucketName = bucketName
     this.client = new minio.Client({
       endPoint,
       port,
       useSSL,
       accessKey,
-      secretKey
+      secretKey,
+      region
     })
   }
 

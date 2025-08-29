@@ -78,7 +78,7 @@ app.get('/auth/perm/:room/:userid', async (res, req) => {
 export const authServerStarted = promise.create((resolve, reject) => {
   const server = app.listen(port, (token) => {
     if (token) {
-      logging.print(logging.GREEN, `[${appName}] Listening to port ${port}`)
+      console.log(logging.GREEN, `[${appName}] Listening to port ${port}`)
       resolve()
     } else {
       const err = error.create(`[${appName}] Failed to lisen to port ${port}`)

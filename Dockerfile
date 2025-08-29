@@ -9,11 +9,11 @@
 
 # Use an official Node.js runtime as a parent image
 # FROM node:20-alpine
-FROM node:lts-alpine3.19
+FROM node:20-bullseye
 
 # Install glibc compatibility for alpine
 # See more at https://wiki.alpinelinux.org/wiki/Running_glibc_programs
-RUN apk add gcompat
+# RUN apk add gcompat
 
 # Set the working directory in the container
 WORKDIR /usr/src/app

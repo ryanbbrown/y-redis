@@ -42,9 +42,18 @@ export const createYWebsocketServer = async ({
   checkPermCallbackUrl,
   initDocCallback = () => {}
 }) => {
+  console.log('[y-redis] Starting WebSocket server on port', port)
   checkPermCallbackUrl += checkPermCallbackUrl.slice(-1) !== '/' ? '/' : ''
   const app = uws.App({})
+  
+  // Add a basic HTTP route for debugging
+  app.get('/*', (res, req) => {
+    console.log('[y-redis] HTTP request received:', req.getUrl())
+    res.writeStatus('200 OK').end('Y-Redis WebSocket Server - Use WebSocket connection')
+  })
+  
   await registerYWebsocketServer(app, '/:room', store, async (req) => {
+    console.log('[y-redis] WebSocket auth check for room:', req.getParameter(0))
     const room = req.getParameter(0)
     const headerWsProtocol = req.getHeader('sec-websocket-protocol')
     const [, , token] = /(^|,)yauth-(((?!,).)*)/.exec(headerWsProtocol) ?? [null, null, req.getQuery('yauth')]
@@ -52,6 +61,8 @@ export const createYWebsocketServer = async ({
       throw new Error('Missing Token')
     }
     // verify that the user has a valid token
+    console.log('[y-redis] Verifying JWT token at server time:', new Date().toISOString())
+    console.log('[y-redis] Server timestamp:', Math.floor(Date.now() / 1000))
     const { payload: userToken } = await jwt.verifyJwt(wsServerPublicKey, token)
     if (userToken.yuserid == null) {
       throw new Error('Missing userid in user token!')
@@ -67,8 +78,9 @@ export const createYWebsocketServer = async ({
   }, { redisPrefix, initDocCallback })
 
   await promise.create((resolve, reject) => {
-    app.listen(port, (token) => {
+    app.listen('0.0.0.0', port, (token) => {
       if (token) {
+        console.log('[y-redis] Listening to port', port)
         logging.print(logging.GREEN, '[y-redis] Listening to port ', port)
         resolve()
       } else {

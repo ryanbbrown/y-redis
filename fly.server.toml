@@ -1,0 +1,41 @@
+# fly.toml app configuration file generated for web-deckbuilding-yredis on 2025-08-29T10:33:06-04:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+# fly.toml app configuration for y-redis WebSocket server
+
+app = "web-deckbuilding-yredis"
+primary_region = "iad"
+
+[build]
+
+[env]
+  # y-redis server listens here
+  PORT = "1234"
+  # Override the port for y-redis server since PORT is used by Fly
+  port = "1234"
+  # Auth server callback URL - points to the auth server running on port 5173
+  AUTH_PERM_CALLBACK = "http://127.0.0.1:5173/auth/perm"
+
+[processes]
+  # run the y-redis WebSocket server
+  web = "npm run start:both"
+
+[[services]]
+  internal_port = 1234
+  processes = ["web"]
+  protocol = "tcp"
+
+  # Expose TLS+HTTP ports; Fly handles WS upgrades
+  [[services.ports]]
+    port = 443
+    handlers = ["tls", "http"]
+
+  [[services.ports]]
+    port = 80
+    handlers = ["http"]
+
+[[vm]]
+  memory = "1gb"
+  cpu_kind = "shared"
+  cpus = 1

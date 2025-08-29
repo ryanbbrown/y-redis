@@ -1,0 +1,22 @@
+# fly.toml app configuration file generated for web-deckbuilding-yredis-worker on 2025-08-29T10:44:35-04:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = "web-deckbuilding-yredis-worker"
+primary_region = "iad"
+
+[build]
+
+# This app exposes NO services; it's a background worker.
+# Fly Machines will keep it running as long as the command below stays alive.
+
+[processes]
+  # y-redis worker entrypoint (from the y-redis repo)
+  worker = "node ./bin/worker.js"
+
+# VM sizing (tune as needed)
+[[vm]]
+  memory = "1gb"
+  cpu_kind = "shared"
+  cpus = 1
