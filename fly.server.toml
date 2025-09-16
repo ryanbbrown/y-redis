@@ -11,6 +11,7 @@ primary_region = "iad"
 
 [env]
   # y-redis server listens here
+  HOST = "0.0.0.0"
   PORT = "1234"
   # Override the port for y-redis server since PORT is used by Fly
   port = "1234"
@@ -19,7 +20,8 @@ primary_region = "iad"
 
 [processes]
   # run the y-redis WebSocket server
-  web = "npm run start:both"
+  # web = "npm run start:both"
+  web = "concurrently -r 'node ./bin/auth-server-example.js' 'node ./bin/server.js'"
 
 [[services]]
   internal_port = 1234

@@ -7,7 +7,12 @@ import * as jwt from 'lib0/crypto/jwt'
 import * as ecdsa from 'lib0/crypto/ecdsa'
 import * as json from 'lib0/json'
 
-const authPrivateKey = await ecdsa.importKeyJwk(json.parse(`private_key_here`))
+// Generate a new key pair for testing
+console.log('Generating key pair...')
+const keyPair = await ecdsa.generateKeyPair()
+const authPrivateKey = keyPair.privateKey
+const publicKey = await ecdsa.exportKeyJwk(keyPair.publicKey)
+console.log('Public key (for server config):', JSON.stringify(publicKey, null, 2))
 // Create a test token with a test user ID
 // lib0's getUnixTime() returns milliseconds, not seconds like standard JWT
 const now = Date.now() // Use milliseconds directly
