@@ -46,6 +46,29 @@ export const createYWebsocketServer = async ({
   checkPermCallbackUrl += checkPermCallbackUrl.slice(-1) !== '/' ? '/' : ''
   const app = uws.App({})
   
+  // Add auth token endpoint that proxies to auth server
+  app.get('/auth/token', async (res, req) => {
+    console.log('[y-redis] Auth token request received')
+    res.onAborted(() => {
+      console.log('[y-redis] Auth token request aborted')
+    })
+    try {
+      const response = await fetch('http://127.0.0.1:5173/auth/token')
+      const token = await response.text()
+      res.cork(() => {
+        res.writeStatus('200 OK')
+        res.writeHeader('Content-Type', 'text/plain')
+        res.end(token)
+      })
+    } catch (error) {
+      console.error('[y-redis] Error fetching auth token:', error)
+      res.cork(() => {
+        res.writeStatus('500 Internal Server Error')
+        res.end('Error generating token')
+      })
+    }
+  })
+
   // Add a basic HTTP route for debugging
   app.get('/*', (res, req) => {
     console.log('[y-redis] HTTP request received:', req.getUrl())

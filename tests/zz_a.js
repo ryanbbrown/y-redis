@@ -3,31 +3,20 @@ import * as Y from 'yjs'
 import { WebsocketProvider } from 'y-websocket'
 import ws from 'ws' // Node WS polyfill
 
-import * as jwt from 'lib0/crypto/jwt'
-import * as ecdsa from 'lib0/crypto/ecdsa'
-import * as json from 'lib0/json'
-
-// Generate a new key pair for testing
-console.log('Generating key pair...')
-const keyPair = await ecdsa.generateKeyPair()
-const authPrivateKey = keyPair.privateKey
-const publicKey = await ecdsa.exportKeyJwk(keyPair.publicKey)
-console.log('Public key (for server config):', JSON.stringify(publicKey, null, 2))
-// Create a test token with a test user ID
-// lib0's getUnixTime() returns milliseconds, not seconds like standard JWT
-const now = Date.now() // Use milliseconds directly
-const payload = {
-    yuserid: 'test-user-12345',
-    exp: now + (24 * 60 * 60 * 1000), // expires in 24 hours (in milliseconds)
-    iat: now, // issued at (in milliseconds)
-    nbf: now - (60 * 1000) // not before (1 minute ago in milliseconds)
+// Fetch token from the auth server
+console.log('Fetching token from auth server...')
+let token
+try {
+  const response = await fetch('https://web-deckbuilding-yredis.fly.dev/auth/token')
+  if (!response.ok) {
+    throw new Error(`Failed to fetch token: ${response.status} ${response.statusText}`)
+  }
+  token = await response.text()
+  console.log('Successfully fetched token:', token.substring(0, 50) + '...')
+} catch (error) {
+  console.error('Error fetching token:', error)
+  process.exit(1)
 }
-
-console.log('Token issued at:', new Date(now).toISOString())
-console.log('Token expires at:', new Date(payload.exp).toISOString())
-
-const token = await jwt.encodeJwt(authPrivateKey, payload)
-console.log('Generated token:', token.substring(0, 50) + '...')
 
 const room = 'smoketest-' + Math.random().toString(36).slice(2, 8)
 console.log('ROOM:', room)
